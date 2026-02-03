@@ -23,7 +23,7 @@ const startServer = async () => {
     console.log(chalk.hex('#ffa500').bold('⚠ SMTP Server Not Connected (Check credentials)'));
   }
 
-  const server = app.listen(env.PORT, () => {
+  const server = app.listen(env.PORT || 3000, () => {
     console.log(chalk.hex('#00ffff').bold(`✓ Server running on port: ${chalk.hex('#ffffff').bold(env.PORT)}`));
     console.log(chalk.hex('#ff00ff').bold(`✓ Environment: ${chalk.hex('#ffffff').bold(env.NODE_ENV)}`));
     console.log(chalk.hex('#6495ED').bold('---------------------------------------------------'));
