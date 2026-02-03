@@ -3,6 +3,7 @@ import { EmailService } from '../email/email.service';
 import { IContact } from './contact.model';
 import { env } from '../../config/env';
 import { Container } from '../../shared/container';
+import { getAdminNotificationTemplate, getUserAutoReplyTemplate } from '../email/templates/email-templates';
 
 export class ContactService {
   private contactRepo: ContactRepository;
@@ -18,21 +19,19 @@ export class ContactService {
     const contact = await this.contactRepo.create(data);
 
     // Send Notification Email to Admin
-    const emailContent = `
-      <h3>New Contact Submission</h3>
-      <p><strong>Name:</strong> ${contact.name}</p>
-      <p><strong>Email:</strong> ${contact.email}</p>
-      <p><strong>Subject:</strong> ${contact.subject}</p>
-      <p><strong>Message:</strong></p>
-      <p>${contact.message}</p>
-      <hr>
-      <p><small>Source: ${contact.source || 'N/A'}</small></p>
-    `;
-
+    const adminHtml = getAdminNotificationTemplate(contact);
     await this.emailService.sendEmail({
       to: env.ADMIN_EMAIL,
       subject: `[Portfolio] New Message: ${contact.subject}`,
-      html: emailContent,
+      html: adminHtml,
+    });
+
+    // Send Auto-Reply to User
+    const userHtml = getUserAutoReplyTemplate(contact);
+    await this.emailService.sendEmail({
+      to: contact.email,
+      subject: `Received: ${contact.subject}`,
+      html: userHtml,
     });
 
     return contact;
