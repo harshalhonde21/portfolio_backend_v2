@@ -48,7 +48,7 @@ const startServer = async () => {
 
   // Ping every 14 minutes (840000 ms) to prevent sleep
   if (process.env.RENDER_EXTERNAL_URL) {
-    setInterval(keepAlive, 840000);
+    setInterval(keepAlive, 300000);
     // Initial ping
     keepAlive();
   }
