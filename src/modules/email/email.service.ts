@@ -25,25 +25,20 @@ export class EmailService {
   }
 
   async sendEmail(options: SendEmailOptions): Promise<void> {
-    // Skip sending in test mode or if credentials are misconfigured (optional check)
+    // Verify configuration before attempting to send
     if (!env.SMTP_HOST || !env.SMTP_USER) {
       Logger.warn('Email service not configured. Skipping email send.');
-      return;
+      throw new Error('Email service not configured');
     }
 
-    try {
-      const info = await this.transporter.sendMail({
-        from: `"${env.FROM_EMAIL}" <${env.FROM_EMAIL}>`,
-        to: options.to,
-        subject: options.subject,
-        html: options.html,
-      });
+    const info = await this.transporter.sendMail({
+      from: `"${env.FROM_EMAIL}" <${env.FROM_EMAIL}>`,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+    });
 
-      Logger.info(`Email sent: ${info.messageId}`);
-    } catch (error: any) {
-      Logger.error(`Error sending email: ${error.message}`);
-      // Don't throw for now, just log. Depends on criticality.
-    }
+    Logger.info(`Email sent: ${info.messageId}`);
   }
 
   async verifyConnection(): Promise<boolean> {

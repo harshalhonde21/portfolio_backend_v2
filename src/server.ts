@@ -1,4 +1,5 @@
 import app from './app';
+import https from 'https';
 import { env } from './config/env';
 import { connectDatabase } from './database';
 import { Logger } from './shared/services/logger';
@@ -29,6 +30,28 @@ const startServer = async () => {
     console.log(chalk.hex('#6495ED').bold('---------------------------------------------------'));
     Logger.info(`Server running in ${env.NODE_ENV} mode on port ${env.PORT}`);
   });
+
+  // Keep-Alive Mechanism
+  const keepAlive = () => {
+    if (process.env.RENDER_EXTERNAL_URL) {
+      https.get(`${process.env.RENDER_EXTERNAL_URL}/health`, (resp) => {
+        if (resp.statusCode === 200) {
+          console.log('Keep-alive ping sent successfully');
+        } else {
+          console.error('Keep-alive ping failed');
+        }
+      }).on('error', (err) => {
+        console.error('Error sending keep-alive ping:', err.message);
+      });
+    }
+  };
+
+  // Ping every 14 minutes (840000 ms) to prevent sleep
+  if (process.env.RENDER_EXTERNAL_URL) {
+    setInterval(keepAlive, 840000);
+    // Initial ping
+    keepAlive();
+  }
 
   // Handle unhandled promise rejections
   process.on('unhandledRejection', (err: Error) => {
